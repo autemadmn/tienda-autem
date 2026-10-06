@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tienda Autem</title>
+<meta name="description" content="Sets técnicos de coches de carreras CaDA. Gíralos en 3D, despiézalos y elige el tuyo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:ital,wdth,wght@0,50..150,400..900;1,50..150,400..900&family=Michroma&family=Martian+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a night showroom. The car sits full-bleed on a lit turntable, its box art glows behind it like a backlit poster, and the shop reads as instrument HUD around the edges. Deliberately single dark theme. */
+:root{
+  --void:#04060B;
+  --night:#080D16;
+  --panel:#0C1320;
+  --panel-2:#111A2B;
+  --line:rgba(94,160,255,.16);
+  --line-2:rgba(94,160,255,.32);
+  --ink:#EAF2FF;
+  --ink-2:#8FA3BF;
+  --ink-3:#5C6F8A;
+  --neon:#2E9BFF;
+  --neon-hi:#7CC4FF;
+  --neon-glow:rgba(46,155,255,.55);
+  --on-neon:#02101F;
+  --f-wide:"Michroma","Arial Black",system-ui,sans-serif;
+  --f-display:"Anybody","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Schibsted Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-data:"Martian Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --gutter:clamp(16px,3vw,44px);
+  --ease:cubic-bezier(.16,1,.3,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--void)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--void);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+::selection{background:var(--neon);color:var(--on-neon)}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:var(--void)}::-webkit-scrollbar-thumb{background:#1A2638;border-radius:10px;border:2px solid var(--void)}
+a{color:inherit;text-underline-offset:3px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--neon-hi);outline-offset:3px;border-radius:4px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1}
+.data{font-family:var(--f-data);font-size:.72rem;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.wrap{max-width:1440px;margin:0 auto;padding-inline:var(--gutter)}
+
+/* ---------- nav ---------- */
+.nav{position:absolute;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:30}
+.nav .wrap{display:flex;align-items:center;gap:28px;padding-block:18px}
+.mark{font-family:var(--f-display);font-weight:900;font-style:italic;font-stretch:150%;font-size:1.55rem;letter-spacing:-.02em;text-decoration:none;line-height:1;text-shadow:0 0 18px var(--neon-glow)}
+.mark span{color:var(--neon)}
+.nav ul{display:flex;gap:26px;list-style:none;margin:0 0 0 auto;padding:0;font-size:.92rem;color:var(--ink-2)}
+.nav ul a{text-decoration:none;transition:color .2s}
+.nav ul a:hover{color:var(--ink)}
+.cart-btn{display:inline-flex;align-items:center;gap:10px;background:rgba(12,19,32,.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line-2);border-radius:999px;padding:9px 14px 9px 13px;font-weight:600;font-size:.9rem;cursor:pointer;transition:border-color .25s,box-shadow .25s}
+.cart-btn:hover{border-color:var(--neon);box-shadow:0 0 22px -6px var(--neon-glow)}
+.cart-btn svg{width:18px;height:18px}
+.cart-count{font-family:var(--f-data);font-size:.72rem;background:var(--neon);color:var(--on-neon);border-radius:999px;min-width:22px;height:22px;display:inline-grid;place-items:center;padding:0 6px;font-weight:500}
+@media (max-width:760px){.nav ul{display:none}.cart-btn{margin-left:auto}}
+
+/* ---------- hero showroom ---------- */
+.hero{position:relative;isolation:isolate;min-height:clamp(640px,92vh,980px);overflow:hidden;background:
+  radial-gradient(ellipse 70% 55% at 50% 58%,rgba(46,155,255,.20),transparent 70%),
+  radial-gradient(ellipse 120% 70% at 50% 120%,rgba(46,155,255,.18),transparent 60%),
+  var(--void)}
+.hero-box{position:absolute;inset:-4%;z-index:-3;background-size:cover;background-position:center;opacity:0;filter:blur(3px) saturate(.6) brightness(.55);transform:scale(1.04);transition:opacity .9s var(--ease),background-image .2s}
+.hero-box.on{opacity:.55}
+.hero-box::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(46,155,255,.25),rgba(4,6,11,.4) 40%,rgba(4,6,11,.85));mix-blend-mode:normal}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;background:
+  repeating-linear-gradient(90deg,rgba(94,160,255,.06) 0 1px,transparent 1px 88px);
+  mask:linear-gradient(180deg,transparent 0,#000 30%,#000 70%,transparent);-webkit-mask:linear-gradient(180deg,transparent 0,#000 30%,#000 70%,transparent)}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34%;z-index:-1;pointer-events:none;background:linear-gradient(180deg,transparent,var(--void))}
+.hero-name{position:absolute;left:50%;top:41%;transform:translate(-50%,-50%);z-index:-1;font-family:var(--f-wide);font-size:clamp(3.4rem,11.5vw,12.5rem);line-height:.9;white-space:nowrap;color:transparent;-webkit-text-stroke:1.5px rgba(124,196,255,.28);letter-spacing:.02em;pointer-events:none;user-select:none;transition:opacity .5s}
+.hero-name.long{font-size:clamp(2.4rem,7.4vw,8rem)}
+
+.stage{position:absolute;inset:0;z-index:1}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:pan-y}
+.stage canvas:active{cursor:grabbing}
+.stage-fallback{position:absolute;inset:12% 10% 30%;display:grid;place-items:center}
+.stage-fallback img{max-width:100%;max-height:100%;object-fit:contain}
+
+.hud{position:absolute;z-index:3;pointer-events:none}
+.hud > *{pointer-events:auto}
+.hud-top{top:calc(78px + env(safe-area-inset-top,0px));left:var(--gutter);right:var(--gutter);display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.series{display:grid;gap:6px}
+.series .code{font-family:var(--f-data);font-size:.74rem;color:var(--neon-hi);letter-spacing:.12em;display:flex;align-items:center;gap:10px}
+.series .code::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--neon);box-shadow:0 0 12px var(--neon)}
+.series .by{font-size:.85rem;color:var(--ink-2)}
+.seg{display:flex;background:rgba(8,13,22,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line-2);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;border-radius:999px;padding:7px 14px;font-size:.82rem;font-weight:600;color:var(--ink-2);cursor:pointer;white-space:nowrap;transition:color .2s,background .2s}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--neon);color:var(--on-neon);box-shadow:0 0 20px -4px var(--neon-glow)}
+
+.hud-info{left:var(--gutter);bottom:calc(150px + env(safe-area-inset-bottom,0px));max-width:min(440px,38vw)}
+.hud-info h1{font-family:var(--f-wide);font-size:clamp(1.7rem,2.8vw,2.7rem);font-weight:400;letter-spacing:.01em;line-height:1.05;text-shadow:0 0 30px rgba(46,155,255,.35)}
+.hud-info p{margin:12px 0 0;color:var(--ink-2);max-width:38ch}
+.buy{display:flex;align-items:center;gap:18px;margin-top:22px;flex-wrap:wrap}
+.price{font-family:var(--f-display);font-weight:800;font-stretch:115%;font-size:clamp(1.9rem,2.6vw,2.4rem);font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-.01em}
+.price small{font-family:var(--f-body);font-size:.75rem;font-weight:500;color:var(--ink-3);margin-left:6px;letter-spacing:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;border:0;padding:14px 24px;font-weight:700;cursor:pointer;text-decoration:none;transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .2s}
+.btn svg{width:18px;height:18px}
+.btn-neon{background:var(--neon);color:var(--on-neon);box-shadow:0 0 0 1px rgba(124,196,255,.5),0 10px 30px -10px var(--neon-glow)}
+.btn-neon:hover{transform:translateY(-2px);box-shadow:0 0 0 1px var(--neon-hi),0 0 36px -4px var(--neon-glow)}
+.btn-neon:active{transform:none}
+.btn-line{background:transparent;color:var(--ink);border:1px solid var(--line-2);padding:9px 15px;font-weight:600;font-size:.86rem}
+.btn-line:hover{border-color:var(--neon);color:var(--neon-hi)}
+
+.hud-specs{right:var(--gutter);bottom:calc(150px + env(safe-area-inset-bottom,0px));width:min(330px,30vw);display:grid;gap:16px}
+.specs{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line-2);border-radius:14px;background:rgba(8,13,22,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:hidden}
+.specs div{padding:12px 14px;display:grid;gap:4px}
+.specs div+div{border-left:1px solid var(--line)}
+.specs dt{font-family:var(--f-data);font-size:.62rem;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase}
+.specs dd{margin:0;font-family:var(--f-display);font-weight:750;font-stretch:112%;font-size:1.3rem;font-variant-numeric:tabular-nums;line-height:1}
+.explode{display:grid;gap:8px}
+.explode-row{display:flex;justify-content:space-between;align-items:baseline}
+.explode label{font-weight:600;font-size:.86rem}
+.explode output{font-family:var(--f-data);font-size:.68rem;color:var(--neon-hi)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--neon) var(--p,0%),rgba(94,160,255,.2) var(--p,0%));box-shadow:0 0 12px -2px var(--neon-glow)}
+input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:rgba(94,160,255,.2)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:4px;background:var(--neon)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-8px;border-radius:50%;background:var(--ink);border:3px solid var(--neon);box-shadow:0 0 16px var(--neon)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--ink);border:3px solid var(--neon);box-shadow:0 0 16px var(--neon)}
+input[type=range]:disabled{opacity:.35;cursor:not-allowed}
+
+.tag{position:absolute;z-index:3;left:50%;transform:translateX(-50%);bottom:calc(132px + env(safe-area-inset-bottom,0px));font-family:var(--f-data);font-size:.64rem;color:var(--ink-3);letter-spacing:.06em;white-space:nowrap;pointer-events:none}
+.tag.loading{color:var(--neon-hi)}
+
+.picker{position:absolute;z-index:3;left:0;right:0;bottom:env(safe-area-inset-bottom,0px);border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(4,6,11,.4),rgba(4,6,11,.92));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.picker ul{list-style:none;margin:0 auto;padding:0 var(--gutter);max-width:1440px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr))}
+.pick{width:100%;display:grid;grid-template-columns:86px minmax(0,1fr);gap:12px;align-items:center;background:none;border:0;padding:16px 12px 18px;text-align:left;cursor:pointer;position:relative;color:var(--ink-2);transition:color .25s}
+.pick::after{content:"";position:absolute;left:12px;right:12px;top:-1px;height:2px;background:var(--neon);box-shadow:0 0 14px var(--neon);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.pick:hover{color:var(--ink)}
+.pick[aria-pressed="true"]{color:var(--ink)}
+.pick[aria-pressed="true"]::after{transform:none}
+.pick img{width:86px;height:54px;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6));transition:transform .4s var(--ease)}
+.pick:hover img,.pick[aria-pressed="true"] img{transform:scale(1.08)}
+.pick .nm{font-weight:600;font-size:.88rem;line-height:1.25;min-width:0}
+.pick .nm .data{display:block;color:var(--ink-3);margin-top:3px;font-size:.66rem}
+.pick[aria-pressed="true"] .nm .data{color:var(--neon-hi)}
+
+.boxview{position:absolute;inset:0;z-index:2;display:grid;place-items:center;padding:150px var(--gutter) 230px;background:rgba(4,6,11,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.boxview img{max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 30px 80px -20px rgba(46,155,255,.35)}
+.box-empty{display:grid;justify-items:center;gap:6px;text-align:center;color:var(--ink-2);border:1px dashed var(--line-2);border-radius:16px;padding:36px 44px;max-width:100%}
+.box-empty svg{width:44px;height:44px;margin-bottom:6px;color:var(--neon)}
+.box-empty b{color:var(--ink);font-size:1.05rem}
+
+@media (max-width:980px){
+  .hero{min-height:0;display:flex;flex-direction:column;padding-top:calc(70px + env(safe-area-inset-top,0px))}
+  .hud-top{position:relative;top:auto;left:auto;right:auto;padding-inline:var(--gutter);order:0}
+  .stage{position:relative;inset:auto;height:clamp(320px,62vw,520px);order:1}
+  .hero-name{top:calc(70px + 50px + clamp(320px,62vw,520px)/2)}
+  .tag{position:relative;left:auto;bottom:auto;transform:none;text-align:center;order:2;margin-top:-8px;white-space:normal;padding-inline:var(--gutter)}
+  .hud-info{position:relative;left:auto;bottom:auto;max-width:none;padding:22px var(--gutter) 0;order:3}
+  .hud-specs{position:relative;right:auto;bottom:auto;width:auto;padding:22px var(--gutter) 24px;order:4}
+  .picker{position:relative;bottom:auto;order:5}
+  .picker ul{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:0;padding:0 8px}
+  .picker li{flex:0 0 auto;scroll-snap-align:start}
+  .pick{grid-template-columns:72px auto;padding:14px 12px}
+  .pick img{width:72px;height:46px}
+  .boxview{padding:24px}
+  .hero::after{height:12%}
+}
+
+/* ---------- sections ---------- */
+section.block{padding-block:clamp(72px,9vw,128px) 0}
+.block-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px 48px;flex-wrap:wrap;margin-bottom:clamp(28px,3.4vw,48px)}
+.block-head h2{font-family:var(--f-wide);font-weight:400;font-size:clamp(1.9rem,4vw,3.6rem);letter-spacing:.01em}
+.block-head p{margin:0;color:var(--ink-2);max-width:48ch}
+
+.lineup{display:grid;gap:14px}
+.car{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr) minmax(0,auto);gap:clamp(18px,3vw,44px);align-items:center;padding:clamp(14px,1.6vw,22px) clamp(16px,2vw,28px);border:1px solid var(--line);border-radius:18px;background:linear-gradient(110deg,var(--panel),var(--night) 60%);position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.car::before{content:"";position:absolute;left:-10%;top:50%;width:55%;aspect-ratio:2.4;transform:translateY(-50%);background:radial-gradient(ellipse at center,rgba(46,155,255,.22),transparent 65%);pointer-events:none}
+.car:hover{border-color:var(--line-2);box-shadow:0 0 40px -18px var(--neon-glow)}
+.car-img{position:relative;aspect-ratio:16/10;max-width:100%}
+.car-img img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 18px 18px rgba(0,0,0,.55));transition:transform .6s var(--ease)}
+.car:hover .car-img img{transform:scale(1.04) translateX(1%)}
+.car-txt{min-width:0}
+.car-txt .data{color:var(--neon-hi)}
+.car-txt h3{font-family:var(--f-wide);font-weight:400;font-size:clamp(1.15rem,1.8vw,1.6rem);margin-top:8px;line-height:1.15}
+.car-txt p{margin:10px 0 0;color:var(--ink-2);max-width:46ch}
+.car-specs{display:flex;gap:22px;margin:16px 0 0;padding:0;flex-wrap:wrap}
+.car-specs div{display:grid;gap:2px}
+.car-specs dt{font-family:var(--f-data);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.car-specs dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.car-buy{display:grid;justify-items:end;gap:14px}
+.car-buy .price{font-size:1.8rem}
+.car-buy .row{display:flex;gap:8px}
+.btn-sm{padding:10px 16px;font-size:.86rem}
+@media (max-width:980px){
+  .car{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
+  .car-buy{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center}
+}
+@media (max-width:600px){
+  .car{grid-template-columns:1fr}
+  .car-img{max-width:420px}
+}
+
+.sheet{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:clamp(24px,4vw,72px);border:1px solid var(--line);border-radius:22px;padding:clamp(22px,3.4vw,52px);background:radial-gradient(ellipse 60% 80% at 0% 0%,rgba(46,155,255,.10),transparent 60%),var(--panel)}
+.sheet h3{font-family:var(--f-wide);font-weight:400;font-size:clamp(1.5rem,2.6vw,2.3rem);line-height:1.1}
+.sheet .who{color:var(--ink-2);margin:12px 0 0}
+.dl{display:grid;grid-template-columns:auto minmax(0,1fr);margin:26px 0 0}
+.dl dt,.dl dd{padding:12px 0;border-bottom:1px solid var(--line);margin:0}
+.dl dt{color:var(--ink-3);font-family:var(--f-data);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding-right:24px;align-self:center}
+.dl dd{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.features-title{font-family:var(--f-data);font-size:.7rem;color:var(--neon-hi);letter-spacing:.12em;text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--line-2)}
+.features{list-style:none;margin:0;padding:0}
+.features li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:15px 0;border-bottom:1px solid var(--line);font-size:1.02rem}
+.features li svg{width:18px;height:18px;margin-top:3px;color:var(--neon)}
+.sheet-note{font-size:.86rem;color:var(--ink-3);margin:16px 0 0}
+@media (max-width:820px){.sheet{grid-template-columns:1fr}}
+
+.faq{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.faq div{padding:24px 26px 26px;border:1px solid var(--line);border-radius:18px;background:var(--night)}
+.faq h3{font-size:1.08rem;font-weight:700;line-height:1.3}
+.faq p{margin:10px 0 0;color:var(--ink-2);max-width:58ch}
+@media (max-width:760px){.faq{grid-template-columns:1fr}}
+
+footer.site{margin-top:clamp(80px,10vw,150px);border-top:1px solid var(--line);position:relative;overflow:hidden}
+footer.site::before{content:"";position:absolute;left:50%;bottom:-40%;width:90%;height:90%;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(46,155,255,.22),transparent 65%);pointer-events:none}
+footer.site .wrap{position:relative;padding-block:clamp(44px,5vw,72px) 28px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px}
+footer.site .big{grid-column:1/-1;font-family:var(--f-display);font-weight:900;font-style:italic;font-stretch:150%;font-size:clamp(3.6rem,13vw,12rem);line-height:.8;letter-spacing:-.04em;color:transparent;-webkit-text-stroke:1.5px var(--neon);text-shadow:0 0 40px rgba(46,155,255,.35)}
+footer.site p{margin:0;font-size:.86rem;color:var(--ink-2);max-width:62ch}
+footer.site .legal{grid-column:1/-1;border-top:1px solid var(--line);padding-top:18px;display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;color:var(--ink-3)}
+@media (max-width:760px){footer.site .wrap{grid-template-columns:1fr}}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(2,4,8,.6);z-index:40;opacity:0;pointer-events:none;transition:opacity .35s var(--ease)}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--night);border-left:1px solid var(--line-2);z-index:41;transform:translateX(100%);transition:transform .45s var(--ease);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:-30px 0 80px -30px var(--neon-glow)}
+.drawer.open{transform:none}
+.drawer header{display:flex;align-items:center;justify-content:space-between;padding:22px 22px;border-bottom:1px solid var(--line)}
+.drawer h2{font-family:var(--f-wide);font-weight:400;font-size:1.3rem}
+.icon-btn{background:none;border:1px solid var(--line-2);border-radius:999px;width:38px;height:38px;display:grid;place-items:center;cursor:pointer}
+.icon-btn:hover{border-color:var(--neon)}
+.icon-btn svg{width:18px;height:18px}
+.lines{flex:1;overflow:auto;padding:4px 22px;list-style:none;margin:0}
+.lines li{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.lines img{width:76px;height:48px;object-fit:contain}
+.lines .t{font-weight:600;line-height:1.25}
+.lines .t .data{display:block;color:var(--ink-3);font-weight:400;margin-top:2px}
+.qty-ctl{display:inline-flex;align-items:center;gap:6px;margin-top:8px}
+.qty-ctl button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line-2);background:none;cursor:pointer;display:grid;place-items:center;font-weight:700;line-height:1}
+.qty-ctl button:hover{border-color:var(--neon)}
+.qty-ctl span{font-family:var(--f-data);font-size:.8rem;min-width:1.5em;text-align:center}
+.empty{padding:44px 0;color:var(--ink-2);text-align:center;display:block!important}
+.empty b{display:block;color:var(--ink);font-size:1.05rem;margin-bottom:4px}
+.drawer-foot{display:grid;gap:12px;padding:18px 22px 22px;border-top:1px solid var(--line-2)}
+.total{display:flex;justify-content:space-between;align-items:baseline}
+.total .price{font-size:1.9rem}
+.drawer .btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.drawer .note{font-size:.82rem;color:var(--ink-3);margin:0}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,160%);visibility:hidden;background:var(--panel-2);border:1px solid var(--line-2);color:var(--ink);padding:12px 18px;border-radius:999px;font-weight:600;z-index:50;transition:transform .5s var(--ease),visibility 0s .5s;display:flex;gap:10px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 0 30px -8px var(--neon-glow)}
+.toast.show{transform:translate(-50%,0);visibility:visible;transition:transform .5s var(--ease),visibility 0s}
+.toast i{width:8px;height:8px;border-radius:50%;background:var(--neon);box-shadow:0 0 10px var(--neon);flex:none}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="mark" href="#top" aria-label="Autem, inicio">AUTEM<span>.</span></a>
+    <ul>
+      <li><a href="#coleccion">Coches</a></li>
+      <li><a href="#ficha">Ficha técnica</a></li>
+      <li><a href="#preguntas">Antes de comprar</a></li>
+    </ul>
+    <button class="cart-btn" id="cartOpen" aria-haspopup="dialog" aria-controls="drawer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h2l2.2 10.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2"/><circle cx="10" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/></svg>
+      Carrito <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-label="Coche seleccionado">
+    <div class="hero-box" id="heroBox" aria-hidden="true"></div>
+    <div class="hero-name" id="heroName" aria-hidden="true">ASSASSIN XR</div>
+
+    <div class="stage" id="stage"></div>
+
+    <div class="hud hud-top">
+      <div class="series">
+        <span class="code" id="hudCode">C61513W</span>
+        <span class="by" id="hudSeries">CaDA Master Series</span>
+      </div>
+      <div class="seg" role="group" aria-label="Qué ver">
+        <button type="button" id="view3d" aria-pressed="true">Modelo 3D</button>
+        <button type="button" id="viewBox" aria-pressed="false">Caja original</button>
+      </div>
+    </div>
+
+    <div class="boxview" id="boxView" hidden>
+      <img id="boxImg" alt="" hidden>
+      <div class="box-empty" id="boxEmpty">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 15 24 6l18 9v18l-18 9-18-9z"/><path d="M6 15l18 9 18-9M24 24v18"/></svg>
+        <b>Foto de la caja original</b>
+        <span class="data" id="boxEmptyCode">C61513W · pendiente de añadir</span>
+      </div>
+    </div>
+
+    <div class="hud hud-info">
+      <h1 id="hudName">Assassin XR</h1>
+      <p id="hudBlurb">Caja secuencial de 8 marchas y alerón que sube mientras la carrocería baja.</p>
+      <div class="buy">
+        <span class="price" id="hudPrice">169,99 €</span>
+        <button class="btn btn-neon" id="hudAdd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Añadir al carrito
+        </button>
+      </div>
+    </div>
+
+    <div class="hud hud-specs">
+      <dl class="specs">
+        <div><dt>Piezas</dt><dd id="hudPcs">3.617</dd></div>
+        <div><dt>Escala</dt><dd id="hudScale">1:10</dd></div>
+        <div><dt>Largo</dt><dd id="hudLen">48 cm</dd></div>
+      </dl>
+      <div class="explode">
+        <div class="explode-row"><label for="explode">Despiece</label><output id="explodeOut" for="explode">Montado</output></div>
+        <input type="range" id="explode" min="0" max="100" value="0" step="1">
+      </div>
+    </div>
+
+    <span class="tag" id="tag">Cargando modelo 3D…</span>
+
+    <nav class="picker" aria-label="Elige un coche"><ul id="picker"></ul></nav>
+  </section>
+
+  <div class="wrap">
+    <section class="block" id="coleccion" aria-labelledby="colTitle">
+      <div class="block-head">
+        <h2 id="colTitle">La colección</h2>
+        <p>Cinco coches, de un monoplaza de 1.667 piezas a un hipercoche teledirigido de 4.449. Todos traen instrucciones impresas y las piezas en bolsas numeradas.</p>
+      </div>
+      <div class="lineup" id="lineup"></div>
+    </section>
+
+    <section class="block" id="ficha" aria-labelledby="sheetTitle">
+      <div class="block-head">
+        <h2>Ficha técnica</h2>
+        <p>Cambia de coche arriba o en la colección y la ficha se actualiza.</p>
+      </div>
+      <div class="sheet">
+        <div>
+          <h3 id="sheetTitle">Assassin XR</h3>
+          <p class="who" id="sheetWho">CaDA · C61513W</p>
+          <dl class="dl" id="sheetDl"></dl>
+        </div>
+        <div>
+          <div class="features-title">Qué trae y qué hace</div>
+          <ul class="features" id="sheetFeatures"></ul>
+          <p class="sheet-note" id="sheetNote"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="preguntas" aria-labelledby="faqTitle">
+      <div class="block-head">
+        <h2 id="faqTitle">Antes de comprar</h2>
+        <p>Lo que más se pregunta sobre los sets de CaDA.</p>
+      </div>
+      <div class="faq">
+        <div><h3>¿Encajan con mis piezas LEGO®?</h3><p>Sí. CaDA fabrica piezas compatibles con el sistema LEGO® Technic: ejes, pines y vigas encajan entre marcas.</p></div>
+        <div><h3>¿Cuáles se mueven solos?</h3><p>El Italian Red Supercar y el V12 Hypercar llevan motores y mando. El monoplaza se puede motorizar con el kit Pro Power de CaDA, que se vende aparte. El 610 y el Assassin XR son de exposición, con funciones mecánicas a mano.</p></div>
+        <div><h3>¿Es difícil montarlos?</h3><p>El 610 Super Car es un buen primer set. Los de más de 3.000 piezas están pensados para montadores con experiencia y llevan varias tardes.</p></div>
+        <div><h3>¿Qué es CaDA?</h3><p>Una marca china de juguetes de construcción, fabricada por Double Eagle. Su línea Master Series reúne diseños de constructores conocidos, y cada caja lleva el nombre del diseñador.</p></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="big" aria-hidden="true">AUTEM</div>
+    <p>Autem vende sets de construcción desde Valencia. Somos una tienda independiente. Los modelos 3D son recreaciones aproximadas de cada set montado.</p>
+    <p>CaDA es una marca de Double Eagle. LEGO® y Technic son marcas de LEGO Group, que no patrocina ni respalda esta tienda. Autem no está afiliada a CaDA ni a LEGO Group.</p>
+    <div class="legal"><span class="data">© 2026 Autem</span><span class="data">Precios con IVA incluido</span></div>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
+  <header>
+    <h2 id="drawerTitle">Carrito</h2>
+    <button class="icon-btn" id="cartClose" aria-label="Cerrar carrito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </header>
+  <ul class="lines" id="lines"></ul>
+  <div class="drawer-foot">
+    <div class="total"><span>Total</span><span class="price" id="total">0,00 €</span></div>
+    <button class="btn btn-neon" id="checkout" disabled>Finalizar compra</button>
+    <p class="note">El pago online todavía no está activo. Puedes preparar tu pedido y lo activaremos muy pronto.</p>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><i></i><span id="toastText"></span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/environments/RoomEnvironment.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ================= catálogo =================
+   model: modelo de Blender, en .glb o en glTF con los datos incrustados (.json).
+   thumb: render del modelo (miniaturas).
+   box:   foto de la caja original (p. ej. "cajas/c61513w.jpg"); se usa de fondo del escaparate. null = pendiente. */
+const PRODUCTS = [
+  { code:"C64004W", name:"Electric Super Racing Car", short:"Monoplaza eléctrico", series:"CaDA Tech",
+    pcs:1667, scale:"1:8", dims:[59.6,23.6,13.8], motor:"Motorizable (kit Pro Power aparte)", price:69.99,
+    blurb:"Monoplaza de fórmula con halo, alerones y suspensión que funciona.",
+    features:["Volante que gira y halo de protección","Suspensión delantera y trasera funcionales","Tapa trasera que se abre y deja ver el motor eléctrico","Alerón delantero, difusor y aleta trasera detallados","Se puede motorizar con el kit Pro Power de CaDA (se vende aparte)"],
+    note:"", model:"models/c64004w.glb", thumb:"renders/c64004w.webp", box:null },
+  { code:"C61018W", name:"610 Super Car", short:"Superdeportivo", series:"CaDA",
+    pcs:1696, scale:"—", dims:[48.8,23.2,13.6], motor:"No", price:74.99,
+    blurb:"El primer superdeportivo perfecto: grande, limpio y asequible.",
+    features:["Puertas y portón trasero que se abren","Carrocería de casi 49 cm de largo","Montaje por bolsas, 297 pasos de instrucciones","Buen primer set técnico para empezar"],
+    note:"Lleva pegatinas para los detalles de la carrocería.", model:"models/c61018w.glb", thumb:"renders/c61018w.webp", box:null },
+  { code:"C61513W", name:"Assassin XR", short:"Superdeportivo", series:"CaDA Master Series",
+    pcs:3617, scale:"1:10", dims:[48,21.6,12.8], motor:"No (funciones mecánicas)", price:169.99,
+    blurb:"Caja secuencial de 8 marchas y alerón que sube mientras la carrocería baja.",
+    features:["Caja de cambios secuencial de 8 marchas","Alerón trasero y altura de suspensión ajustables a la vez","Puertas mariposa y capó delantero que se abren","Motor V8 con pistones que se mueven","Asientos de piloto y copiloto"],
+    note:"", model:"models/c61513w.glb", thumb:"renders/c61513w.webp", box:null },
+  { code:"C61042W", name:"Italian Red Supercar", short:"Teledirigido", series:"CaDA Master Series · diseño de Bruno Jenson",
+    pcs:3187, scale:"1:8", dims:[52,25,13], motor:"Sí, con mando y luces", price:219.99,
+    blurb:"Réplica a escala 1:8 que además se conduce con mando.",
+    features:["Motores, batería y mando incluidos","Luces delanteras","Capó, maletero, guantera y puertas que se abren","Motor V8 detallado en la parte trasera","Suspensión independiente"],
+    note:"Viene en 6 cajas numeradas con un manual a color.", model:"models/c61042w.glb", thumb:"renders/c61042w.webp", box:null },
+  { code:"C61053W", name:"V12 Hypercar", short:"Teledirigido", series:"CaDA Master Series · diseño de Suhwan Ji",
+    pcs:4449, scale:"1:8", dims:[60,27,14], motor:"Sí, dos modos de velocidad", price:239.99,
+    blurb:"El set más grande de la Master Series, con motores nuevos y dos velocidades.",
+    features:["Motorizado, con dos modos de velocidad","4.449 piezas, el mayor coche de la Master Series","Pines negros en lugar de azules, para un acabado más limpio","Motor V12 recreado pieza a pieza"],
+    note:"Existe una versión estática sin motor (C64003W).", model:"models/c61053w.glb", thumb:"renders/c61053w.webp", box:null }
+];
+
+const fmt = new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR"});
+const num = new Intl.NumberFormat("de-DE"); /* agrupa también 4 cifras: 3.617 */
+const $ = s => document.querySelector(s);
+const cm = x => String(x).replace(".",",");
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+let current = 2, view = "3d";
+const pic = p => p.box || p.thumb || "";
+
+/* ================= selector y colección ================= */
+const picker = $("#picker");
+PRODUCTS.forEach((p,i)=>{
+  const li = document.createElement("li");
+  li.innerHTML = `<button class="pick" aria-pressed="${i===current}"><img src="${p.thumb}" alt=""><span class="nm">${p.name}<span class="data">${fmt.format(p.price)}</span></span></button>`;
+  li.firstElementChild.addEventListener("click",()=>select(i));
+  picker.appendChild(li);
+});
+const lineup = $("#lineup");
+PRODUCTS.forEach((p,i)=>{
+  const el = document.createElement("article");
+  el.className = "car";
+  el.innerHTML = `
+    <div class="car-img"><img src="${p.thumb}" alt="Recreación 3D del ${p.name}" loading="lazy"></div>
+    <div class="car-txt"><span class="data">${p.code} · ${p.series}</span><h3>${p.name}</h3><p>${p.blurb}</p>
+      <dl class="car-specs"><div><dt>Piezas</dt><dd>${num.format(p.pcs)}</dd></div><div><dt>Escala</dt><dd>${p.scale==="—"?"No indicada":p.scale}</dd></div><div><dt>Largo</dt><dd>${cm(p.dims[0])} cm</dd></div><div><dt>Motor</dt><dd>${p.motor.split(",")[0].split(" (")[0]}</dd></div></dl></div>
+    <div class="car-buy"><span class="price">${fmt.format(p.price)}</span>
+      <div class="row"><button class="btn btn-line btn-sm" data-view="${i}">Ver en 3D</button><button class="btn btn-neon btn-sm" data-add="${i}">Añadir</button></div></div>`;
+  lineup.appendChild(el);
+});
+lineup.addEventListener("click",e=>{
+  const v = e.target.closest("[data-view]"), a = e.target.closest("[data-add]");
+  if(v){ select(+v.dataset.view); setView("3d"); $("#top").scrollIntoView({behavior:reduceMotion?"auto":"smooth"}); }
+  if(a){ addToCart(+a.dataset.add); }
+});
+
+/* ================= textos del coche activo ================= */
+function updateText(){
+  const p = PRODUCTS[current];
+  $("#hudCode").textContent = p.code;
+  $("#hudSeries").textContent = p.series;
+  $("#hudName").textContent = p.name;
+  $("#hudBlurb").textContent = p.blurb;
+  $("#hudPrice").innerHTML = `${fmt.format(p.price)}<small>IVA incl.</small>`;
+  $("#hudPcs").textContent = num.format(p.pcs);
+  $("#hudScale").textContent = p.scale;
+  $("#hudLen").textContent = `${Math.round(p.dims[0])} cm`;
+  const hn = $("#heroName"); hn.textContent = p.name.toUpperCase(); hn.classList.toggle("long", p.name.length > 14);
+  const hb = $("#heroBox");
+  if(p.box){ hb.style.backgroundImage = `url("${p.box}")`; hb.classList.add("on"); } else { hb.classList.remove("on"); }
+  $("#sheetTitle").textContent = p.name;
+  $("#sheetWho").textContent = `${p.series} · ${p.code}`;
+  $("#sheetDl").innerHTML = `<dt>Piezas</dt><dd>${num.format(p.pcs)}</dd>
+    <dt>Escala</dt><dd>${p.scale==="—"?"No indicada":p.scale}</dd>
+    <dt>Medidas montado</dt><dd>${p.dims.map(cm).join(" × ")} cm</dd>
+    <dt>Motor</dt><dd>${p.motor}</dd>
+    <dt>Precio</dt><dd>${fmt.format(p.price)}</dd>`;
+  $("#sheetFeatures").innerHTML = p.features.map(f=>`<li>${CHECK}<span>${f}</span></li>`).join("");
+  $("#sheetNote").textContent = p.note;
+  document.querySelectorAll(".pick").forEach((b,i)=>b.setAttribute("aria-pressed", String(i===current)));
+  const bi = $("#boxImg");
+  if(p.box){ bi.src = p.box; bi.alt = `Caja original del set ${p.code} ${p.name}`; bi.hidden = false; $("#boxEmpty").hidden = true; }
+  else { bi.hidden = true; bi.removeAttribute("src"); $("#boxEmpty").hidden = false; $("#boxEmptyCode").textContent = `${p.code} · pendiente de añadir`; }
+}
+const range = $("#explode"), out = $("#explodeOut");
+function setView(v){
+  view = v;
+  $("#view3d").setAttribute("aria-pressed", String(v==="3d"));
+  $("#viewBox").setAttribute("aria-pressed", String(v==="box"));
+  $("#boxView").hidden = v!=="box";
+  range.disabled = v==="box";
+}
+$("#view3d").addEventListener("click",()=>setView("3d"));
+$("#viewBox").addEventListener("click",()=>setView("box"));
+$("#hudAdd").addEventListener("click",()=>addToCart(current));
+
+/* ================= carrito ================= */
+const cart = new Map();
+function addToCart(i){ const p = PRODUCTS[i]; cart.set(p.code,(cart.get(p.code)||0)+1); renderCart(); toast(`Añadido: ${p.name}`); }
+function renderCart(){
+  let count=0,total=0; const lines=$("#lines"); lines.innerHTML="";
+  cart.forEach((q,code)=>{
+    const p = PRODUCTS.find(x=>x.code===code); count+=q; total+=q*p.price;
+    const li=document.createElement("li");
+    li.innerHTML=`<img src="${pic(p)}" alt="">
+      <div class="t">${p.name}<span class="data">${code} · ${fmt.format(p.price)}</span>
+        <span class="qty-ctl"><button data-dec="${code}" aria-label="Quitar uno de ${p.name}">−</button><span>${q}</span><button data-inc="${code}" aria-label="Añadir otro ${p.name}">+</button></span></div>
+      <span class="data" style="font-size:.85rem">${fmt.format(q*p.price)}</span>`;
+    lines.appendChild(li);
+  });
+  if(!cart.size) lines.innerHTML=`<li class="empty"><b>Tu carrito está vacío</b>Elige un coche y pulsa «Añadir al carrito».</li>`;
+  $("#cartCount").textContent=count; $("#total").textContent=fmt.format(total);
+}
+$("#lines").addEventListener("click",e=>{
+  const inc=e.target.closest("[data-inc]"), dec=e.target.closest("[data-dec]");
+  if(inc){cart.set(inc.dataset.inc,cart.get(inc.dataset.inc)+1);renderCart();}
+  if(dec){const c=dec.dataset.dec,q=cart.get(c)-1; q>0?cart.set(c,q):cart.delete(c); renderCart();}
+});
+const drawer=$("#drawer"), scrim=$("#scrim");
+function openCart(){drawer.classList.add("open");scrim.classList.add("open");drawer.removeAttribute("inert");drawer.setAttribute("aria-hidden","false");$("#cartClose").focus();}
+function closeCart(){drawer.classList.remove("open");scrim.classList.remove("open");drawer.setAttribute("inert","");drawer.setAttribute("aria-hidden","true");$("#cartOpen").focus();}
+$("#cartOpen").addEventListener("click",openCart);
+$("#cartClose").addEventListener("click",closeCart);
+scrim.addEventListener("click",closeCart);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&drawer.classList.contains("open"))closeCart();});
+let tt; function toast(t){$("#toastText").textContent=t;$("#toast").classList.add("show");clearTimeout(tt);tt=setTimeout(()=>$("#toast").classList.remove("show"),2200);}
+renderCart();
+
+/* ================= escaparate 3D ================= */
+const host = $("#stage"), tag = $("#tag");
+let explodeTarget = 0, explodeNow = 0, has3D = false;
+function setExplodeUI(v){ range.style.setProperty("--p", v+"%"); out.textContent = v<3 ? "Montado" : v>97 ? "Despiece completo" : `${v} %`; }
+range.addEventListener("input",()=>{ explodeTarget = range.value/100; setExplodeUI(+range.value); if(reduceMotion) explodeNow = explodeTarget; });
+setExplodeUI(0);
+
+function showFallback(p, msg){
+  host.querySelector(".stage-fallback")?.remove();
+  host.insertAdjacentHTML("beforeend",`<div class="stage-fallback"><img src="${p.thumb}" alt="Render del ${p.name}"></div>`);
+  tag.textContent = msg; tag.classList.remove("loading");
+}
+
+const webgl = (function(){try{const c=document.createElement("canvas");return !!(c.getContext("webgl2")||c.getContext("webgl"));}catch(e){return false;}})();
+if(!window.THREE || !webgl){
+  updateText(); showFallback(PRODUCTS[current],"Tu navegador no muestra 3D: ves el render del modelo");
+  window.__select = i=>{ current=i; updateText(); showFallback(PRODUCTS[i],"Tu navegador no muestra 3D: ves el render del modelo"); };
+} else { has3D = true; }
+
+let select = i=>window.__select(i);
+
+if(has3D){
+THREE.ColorManagement.legacyMode = false;
+const renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0x000000,0);
+host.prepend(renderer.domElement);
+renderer.domElement.setAttribute("role","img");
+renderer.domElement.setAttribute("aria-label","Modelo 3D del coche seleccionado. Arrastra para girarlo.");
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(26,1,0.1,600);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.enablePan = false; controls.enableZoom = false;
+controls.minPolarAngle = Math.PI*0.2; controls.maxPolarAngle = Math.PI*0.47;
+controls.autoRotate = !reduceMotion; controls.autoRotateSpeed = 0.7;
+controls.addEventListener("start",()=>{ controls.autoRotate = false; });
+
+/* luz de estudio: key blanca + contraluces neón */
+const key = new THREE.DirectionalLight(0xffffff,1.25);
+key.position.set(14,30,18); key.castShadow = true; key.shadow.mapSize.set(2048,2048);
+Object.assign(key.shadow.camera,{left:-24,right:24,top:24,bottom:-24,near:1,far:90}); key.shadow.bias=-0.0004;
+scene.add(key);
+const rimA = new THREE.DirectionalLight(0x3a9dff,2.2); rimA.position.set(-22,10,-16); scene.add(rimA);
+const rimB = new THREE.DirectionalLight(0x6fc0ff,1.1); rimB.position.set(22,6,-20); scene.add(rimB);
+scene.add(new THREE.HemisphereLight(0x9cc8ff,0x05070c,0.35));
+
+/* suelo: sombra, anillo neón y rejilla que se desvanece */
+const floor = new THREE.Group(); scene.add(floor);
+const shadow = new THREE.Mesh(new THREE.CircleGeometry(30,64), new THREE.ShadowMaterial({opacity:0.55}));
+shadow.rotation.x=-Math.PI/2; shadow.receiveShadow=true; floor.add(shadow);
+const glowTex = (()=>{const c=document.createElement("canvas");c.width=c.height=256;const g=c.getContext("2d");const r=g.createRadialGradient(128,128,0,128,128,128);r.addColorStop(0,"rgba(46,155,255,.55)");r.addColorStop(.45,"rgba(46,155,255,.16)");r.addColorStop(1,"rgba(46,155,255,0)");g.fillStyle=r;g.fillRect(0,0,256,256);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;})();
+const pool = new THREE.Mesh(new THREE.PlaneGeometry(58,58), new THREE.MeshBasicMaterial({map:glowTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));
+pool.rotation.x=-Math.PI/2; pool.position.y=0.005; floor.add(pool);
+const ringMat = new THREE.MeshBasicMaterial({color:0x2e9bff,transparent:true,opacity:0.9,blending:THREE.AdditiveBlending,depthWrite:false});
+const ring = new THREE.Mesh(new THREE.RingGeometry(18.2,18.38,160), ringMat); ring.rotation.x=-Math.PI/2; ring.position.y=0.01; floor.add(ring);
+const ring2 = new THREE.Mesh(new THREE.RingGeometry(19.4,19.46,160), new THREE.MeshBasicMaterial({color:0x7cc4ff,transparent:true,opacity:0.35,blending:THREE.AdditiveBlending,depthWrite:false})); ring2.rotation.x=-Math.PI/2; ring2.position.y=0.01; floor.add(ring2);
+const ticks = new THREE.Group();
+for(let k=0;k<72;k++){ const a=k/72*Math.PI*2, long=k%6===0; const m=new THREE.Mesh(new THREE.PlaneGeometry(long?1.1:0.5,0.06), new THREE.MeshBasicMaterial({color:0x7cc4ff,transparent:true,opacity:long?0.6:0.28,blending:THREE.AdditiveBlending,depthWrite:false})); m.rotation.x=-Math.PI/2; m.rotation.z=-a; m.position.set(Math.cos(a)*20.6,0.01,Math.sin(a)*20.6); ticks.add(m); }
+floor.add(ticks);
+
+floor.scale.setScalar(0.84);
+const turntable = new THREE.Group(); scene.add(turntable);
+
+/* ---------- carga de modelos ---------- */
+const TARGET_LEN = 27;
+async function fetchModelBuffer(url){
+  const r = await fetch(url);
+  if(!r.ok) throw new Error("HTTP " + r.status + " al cargar " + url);
+  if(!/\.json$/i.test(url)) return r.arrayBuffer();
+  /* glTF con el buffer en base64: se reensambla como GLB en memoria (la página no puede pedir URLs data:) */
+  const j = await r.json();
+  const uri = j.buffers[0].uri || ""; const b64 = uri.slice(uri.indexOf(",")+1);
+  const raw = atob(b64), bin = new Uint8Array(raw.length);
+  for(let k=0;k<raw.length;k++) bin[k] = raw.charCodeAt(k);
+  delete j.buffers[0].uri; j.buffers[0].byteLength = bin.length;
+  const js = new TextEncoder().encode(JSON.stringify(j));
+  const jp = (4 - js.length % 4) % 4, bp = (4 - bin.length % 4) % 4;
+  const total = 28 + js.length + jp + bin.length + bp;
+  const buf = new ArrayBuffer(total), dv = new DataView(buf), u8 = new Uint8Array(buf);
+  dv.setUint32(0,0x46546C67,true); dv.setUint32(4,2,true); dv.setUint32(8,total,true);
+  dv.setUint32(12,js.length+jp,true); dv.setUint32(16,0x4E4F534A,true);
+  u8.set(js,20); u8.fill(0x20,20+js.length,20+js.length+jp);
+  const o = 20 + js.length + jp;
+  dv.setUint32(o,bin.length+bp,true); dv.setUint32(o+4,0x004E4942,true); u8.set(bin,o+8);
+  return buf;
+}
+function finalize(g, parts){
+  const box = new THREE.Box3().setFromObject(g), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+  g.children.forEach(o=>{ o.position.x-=c.x; o.position.z-=c.z; o.position.y-=box.min.y; });
+  parts.forEach(o=>{
+    o.userData.base = o.position.clone();
+    const p = o.position, lift = p.y/size.y;
+    o.userData.dir = new THREE.Vector3(p.x*0.32, 2 + lift*9 + Math.abs(p.z)*0.15, p.z*1.05 + Math.sign(p.z||1)*0.6);
+  });
+  return {group:g, parts, length:size.x, height:size.y};
+}
+function loadModel(url){
+  return fetchModelBuffer(url).then(buf=>new Promise((res,rej)=>{
+    new THREE.GLTFLoader().parse(buf,"",gltf=>{
+      const root = gltf.scene;
+      const b = new THREE.Box3().setFromObject(root), s = b.getSize(new THREE.Vector3());
+      root.scale.setScalar(TARGET_LEN/Math.max(s.x,s.z));
+      if(s.z > s.x) root.rotation.y = Math.PI/2;
+      root.updateMatrixWorld(true);
+      const g = new THREE.Group(), parts = [];
+      root.traverse(o=>{
+        if(!o.isMesh || o.isSkinnedMesh) return;
+        const geo = o.geometry.clone(); geo.applyMatrix4(o.matrixWorld); geo.computeBoundingBox();
+        const c = geo.boundingBox.getCenter(new THREE.Vector3()); geo.translate(-c.x,-c.y,-c.z);
+        const mt = o.material; if(mt && "envMapIntensity" in mt) mt.envMapIntensity = 0.45;
+        const mesh = new THREE.Mesh(geo, mt); mesh.position.copy(c); mesh.castShadow = true; mesh.receiveShadow = true;
+        g.add(mesh); parts.push(mesh);
+      });
+      if(!parts.length) return rej(new Error("modelo sin mallas"));
+      res(finalize(g, parts));
+    }, rej);
+  }));
+}
+
+const models = {}, pending = {};
+function getModel(i){
+  const p = PRODUCTS[i];
+  if(models[p.code]) return Promise.resolve(models[p.code]);
+  if(!pending[p.code]) pending[p.code] = loadModel(p.model).then(m=>(models[p.code]=m)).finally(()=>{ delete pending[p.code]; });
+  return pending[p.code];
+}
+
+let active = null;
+function frame(m){
+  const L = m.length, narrow = host.clientWidth < 700;
+  const d = L * (narrow ? 1.72 : 1.95);
+  camera.position.set(d*0.78, L*0.36, d*0.74);
+  controls.target.set(0, m.height*0.38 - (narrow ? 0 : L*0.07), 0); controls.update();
+}
+function applyExplode(m, t){ m.parts.forEach(o=>{ o.position.copy(o.userData.base).addScaledVector(o.userData.dir, t*0.55); }); }
+
+select = async function(i){
+  current = i; updateText();
+  const p = PRODUCTS[i];
+  if(!models[p.code]){ tag.textContent = "Cargando modelo 3D…"; tag.classList.add("loading"); }
+  let m;
+  try{ m = await getModel(i); }
+  catch(e){ console.warn("Modelo 3D no cargado:", p.model, e); if(current===i){ if(active){turntable.remove(active.group); active=null;} showFallback(p,"No se pudo cargar el 3D: ves el render del modelo"); } return; }
+  if(current !== i) return;
+  host.querySelector(".stage-fallback")?.remove();
+  if(active) turntable.remove(active.group);
+  active = m; turntable.add(m.group); frame(m);
+  tag.textContent = "Recreación 3D aproximada del set montado · arrastra para girar"; tag.classList.remove("loading");
+  if(!reduceMotion){ explodeNow = Math.max(explodeTarget, 0.9); }
+  applyExplode(m, explodeNow);
+  /* precarga el siguiente coche en segundo plano */
+  const n = (i+1)%PRODUCTS.length; setTimeout(()=>getModel(n).catch(()=>{}), 1200);
+};
+
+function resize(){
+  const w = host.clientWidth, h = host.clientHeight;
+  renderer.setSize(w,h,false); camera.aspect = w/h; camera.updateProjectionMatrix();
+  if(active) frame(active);
+}
+new ResizeObserver(resize).observe(host); resize();
+
+let visible = true;
+new IntersectionObserver(es=>{ visible = es[0].isIntersecting; },{threshold:0}).observe(host);
+const clock = new THREE.Clock(); let t = 0;
+(function loop(){
+  requestAnimationFrame(loop);
+  const dt = Math.min(clock.getDelta(), 0.05); t += dt;
+  if(!visible || view==="box") return;
+  if(active && Math.abs(explodeNow - explodeTarget) > 0.0005){
+    explodeNow += (explodeTarget - explodeNow) * (1 - Math.exp(-dt*5));
+    applyExplode(active, explodeNow);
+  }
+  if(!reduceMotion){ ticks.rotation.y = -t*0.05; ringMat.opacity = 0.75 + Math.sin(t*1.6)*0.15; }
+  controls.update(); renderer.render(scene,camera);
+})();
+}
+
+updateText();
+select(current);
+})();
+</script>
+
+</body>
+</html>
