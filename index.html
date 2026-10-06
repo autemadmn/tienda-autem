@@ -66,9 +66,9 @@ h1,h2,h3{margin:0;text-wrap:balance;line-height:1}
   radial-gradient(ellipse 70% 55% at 50% 58%,rgba(46,155,255,.20),transparent 70%),
   radial-gradient(ellipse 120% 70% at 50% 120%,rgba(46,155,255,.18),transparent 60%),
   var(--void)}
-.hero-box{position:absolute;inset:-4%;z-index:-3;background-size:cover;background-position:center;opacity:0;filter:blur(3px) saturate(.6) brightness(.55);transform:scale(1.04);transition:opacity .9s var(--ease),background-image .2s}
-.hero-box.on{opacity:.55}
-.hero-box::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(46,155,255,.25),rgba(4,6,11,.4) 40%,rgba(4,6,11,.85));mix-blend-mode:normal}
+.hero-box{position:absolute;inset:6% 4% 18%;z-index:-3;background-size:contain;background-repeat:no-repeat;background-position:center;opacity:0;filter:blur(2.5px) saturate(.75) brightness(.7);transform:scale(1.04);transition:opacity .9s var(--ease),background-image .2s}
+.hero-box.on{opacity:.42}
+.hero-box::after{content:"";position:absolute;inset:-10%;background:radial-gradient(ellipse 70% 70% at 50% 50%,transparent 35%,var(--void) 80%),linear-gradient(180deg,rgba(46,155,255,.18),transparent 60%)}
 .hero::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;background:
   repeating-linear-gradient(90deg,rgba(94,160,255,.06) 0 1px,transparent 1px 88px);
   mask:linear-gradient(180deg,transparent 0,#000 30%,#000 70%,transparent);-webkit-mask:linear-gradient(180deg,transparent 0,#000 30%,#000 70%,transparent)}
@@ -291,7 +291,7 @@ footer.site .legal{grid-column:1/-1;border-top:1px solid var(--line);padding-top
       </div>
       <div class="seg" role="group" aria-label="Qué ver">
         <button type="button" id="view3d" aria-pressed="true">Modelo 3D</button>
-        <button type="button" id="viewBox" aria-pressed="false">Caja original</button>
+        <button type="button" id="viewBox" aria-pressed="false">Foto oficial</button>
       </div>
     </div>
 
@@ -379,7 +379,7 @@ footer.site .legal{grid-column:1/-1;border-top:1px solid var(--line);padding-top
 <footer class="site">
   <div class="wrap">
     <div class="big" aria-hidden="true">AUTEM</div>
-    <p>Autem vende sets de construcción desde Valencia. Somos una tienda independiente. Los modelos 3D son recreaciones aproximadas de cada set montado.</p>
+    <p>Autem vende sets de construcción desde Valencia. Somos una tienda independiente. Los modelos 3D son recreaciones aproximadas de cada set montado. Las fotos de producto son de CaDA.</p>
     <p>CaDA es una marca de Double Eagle. LEGO® y Technic son marcas de LEGO Group, que no patrocina ni respalda esta tienda. Autem no está afiliada a CaDA ni a LEGO Group.</p>
     <div class="legal"><span class="data">© 2026 Autem</span><span class="data">Precios con IVA incluido</span></div>
   </div>
@@ -415,30 +415,30 @@ footer.site .legal{grid-column:1/-1;border-top:1px solid var(--line);padding-top
    box:   foto de la caja original (p. ej. "cajas/c61513w.jpg"); se usa de fondo del escaparate. null = pendiente. */
 const PRODUCTS = [
   { code:"C64004W", name:"Electric Super Racing Car", short:"Monoplaza eléctrico", series:"CaDA Tech",
-    pcs:1667, scale:"1:8", dims:[59.6,23.6,13.8], motor:"Motorizable (kit Pro Power aparte)", price:69.99,
+    pcs:1667, scale:"1:8", dims:[59.6,23.6,13.8], motor:"Motorizable (kit Pro Power aparte)", price:58.99,
     blurb:"Monoplaza de fórmula con halo, alerones y suspensión que funciona.",
     features:["Volante que gira y halo de protección","Suspensión delantera y trasera funcionales","Tapa trasera que se abre y deja ver el motor eléctrico","Alerón delantero, difusor y aleta trasera detallados","Se puede motorizar con el kit Pro Power de CaDA (se vende aparte)"],
-    note:"", model:"models/c64004w.glb", thumb:"renders/c64004w.webp", box:null },
+    note:"", model:"models/c64004w.glb", thumb:"renders/c64004w.webp", box:"cajas/c64004w.webp" },
   { code:"C61018W", name:"610 Super Car", short:"Superdeportivo", series:"CaDA",
-    pcs:1696, scale:"—", dims:[48.8,23.2,13.6], motor:"No", price:74.99,
+    pcs:1696, scale:"—", dims:[48.8,23.2,13.6], motor:"No", price:106.99,
     blurb:"El primer superdeportivo perfecto: grande, limpio y asequible.",
     features:["Puertas y portón trasero que se abren","Carrocería de casi 49 cm de largo","Montaje por bolsas, 297 pasos de instrucciones","Buen primer set técnico para empezar"],
-    note:"Lleva pegatinas para los detalles de la carrocería.", model:"models/c61018w.glb", thumb:"renders/c61018w.webp", box:null },
+    note:"Lleva pegatinas para los detalles de la carrocería.", model:"models/c61018w.glb", thumb:"renders/c61018w.webp", box:"cajas/c61018w.webp" },
   { code:"C61513W", name:"Assassin XR", short:"Superdeportivo", series:"CaDA Master Series",
-    pcs:3617, scale:"1:10", dims:[48,21.6,12.8], motor:"No (funciones mecánicas)", price:169.99,
+    pcs:3617, scale:"1:10", dims:[48,21.6,12.8], motor:"No (funciones mecánicas)", price:202.99,
     blurb:"Caja secuencial de 8 marchas y alerón que sube mientras la carrocería baja.",
     features:["Caja de cambios secuencial de 8 marchas","Alerón trasero y altura de suspensión ajustables a la vez","Puertas mariposa y capó delantero que se abren","Motor V8 con pistones que se mueven","Asientos de piloto y copiloto"],
-    note:"", model:"models/c61513w.glb", thumb:"renders/c61513w.webp", box:null },
+    note:"", model:"models/c61513w.glb", thumb:"renders/c61513w.webp", box:"cajas/c61513w.webp" },
   { code:"C61042W", name:"Italian Red Supercar", short:"Teledirigido", series:"CaDA Master Series · diseño de Bruno Jenson",
-    pcs:3187, scale:"1:8", dims:[52,25,13], motor:"Sí, con mando y luces", price:219.99,
+    pcs:3187, scale:"1:8", dims:[52,25,13], motor:"Sí, con mando y luces", price:277.99,
     blurb:"Réplica a escala 1:8 que además se conduce con mando.",
     features:["Motores, batería y mando incluidos","Luces delanteras","Capó, maletero, guantera y puertas que se abren","Motor V8 detallado en la parte trasera","Suspensión independiente"],
-    note:"Viene en 6 cajas numeradas con un manual a color.", model:"models/c61042w.glb", thumb:"renders/c61042w.webp", box:null },
+    note:"Viene en 6 cajas numeradas con un manual a color.", model:"models/c61042w.glb", thumb:"renders/c61042w.webp", box:"cajas/c61042w.webp" },
   { code:"C61053W", name:"V12 Hypercar", short:"Teledirigido", series:"CaDA Master Series · diseño de Suhwan Ji",
-    pcs:4449, scale:"1:8", dims:[60,27,14], motor:"Sí, dos modos de velocidad", price:239.99,
+    pcs:4449, scale:"1:8", dims:[60,27,14], motor:"Sí, dos modos de velocidad", price:277.99,
     blurb:"El set más grande de la Master Series, con motores nuevos y dos velocidades.",
     features:["Motorizado, con dos modos de velocidad","4.449 piezas, el mayor coche de la Master Series","Pines negros en lugar de azules, para un acabado más limpio","Motor V12 recreado pieza a pieza"],
-    note:"Existe una versión estática sin motor (C64003W).", model:"models/c61053w.glb", thumb:"renders/c61053w.webp", box:null }
+    note:"Existe una versión estática sin motor (C64003W).", model:"models/c61053w.glb", thumb:"renders/c61053w.webp", box:"cajas/c61053w.webp" }
 ];
 
 const fmt = new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR"});
@@ -501,7 +501,7 @@ function updateText(){
   $("#sheetNote").textContent = p.note;
   document.querySelectorAll(".pick").forEach((b,i)=>b.setAttribute("aria-pressed", String(i===current)));
   const bi = $("#boxImg");
-  if(p.box){ bi.src = p.box; bi.alt = `Caja original del set ${p.code} ${p.name}`; bi.hidden = false; $("#boxEmpty").hidden = true; }
+  if(p.box){ bi.src = p.box; bi.alt = `Foto oficial de CaDA del set ${p.code} ${p.name}`; bi.hidden = false; $("#boxEmpty").hidden = true; }
   else { bi.hidden = true; bi.removeAttribute("src"); $("#boxEmpty").hidden = false; $("#boxEmptyCode").textContent = `${p.code} · pendiente de añadir`; }
 }
 const range = $("#explode"), out = $("#explodeOut");
