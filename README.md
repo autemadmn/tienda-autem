@@ -1,11 +1,12 @@
-# Tienda Autem
+# Tienda Autem · Maserati GT2
 
-Escaparate web de Autem para sets técnicos de coches de carreras CaDA, con visor 3D (Three.js) y despiece.
+Tienda de un solo producto: el set de bloques teledirigido **CaDA Maserati GT2 (C51089W)**, escala 1:20, 320 piezas, con licencia oficial de Maserati. Precio: 55,49 € (IVA incluido).
 
 - `index.html`: la tienda (HTML, CSS y JS en un solo archivo).
-- `models/`: modelos 3D en `.glb`, recreaciones aproximadas de cada set montado.
-- `renders/`: miniaturas de cada modelo.
+- `fotos/`: fotos oficiales de producto de CaDA, recortadas.
+- `cajas/c51089w-caja.webp`: render 3D de la caja hecho a partir de la foto oficial.
 
-Para añadir las fotos de las cajas, sube las imágenes (p. ej. `cajas/c61513w.jpg`) y rellena `box:` en el array `PRODUCTS` de `index.html`.
+## Modelo 3D
+Cuando Codex entregue `models/c51089w.glb`, súbelo a `models/` y cambia `model:null` por `model:"models/c51089w.glb"` en el objeto `PRODUCT` de `index.html`. La web pasa sola del visor de fotos al visor 3D.
 
-CaDA es una marca de Double Eagle. LEGO® y Technic son marcas de LEGO Group. Autem no está afiliada a CaDA ni a LEGO Group.
+Maserati y el tridente son marcas de Maserati S.p.A. LEGO® es una marca de LEGO Group, que no patrocina ni respalda esta tienda.
